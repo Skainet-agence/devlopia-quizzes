@@ -33,7 +33,7 @@ async function loadQuizzes() {
                     <i class="fa-solid fa-clipboard-question" style="font-size: 2rem; color: var(--primary-blue); margin-bottom: 15px;"></i>
                 </div>
                 <h3>${quiz.title}</h3>
-                <p>${quiz.week} • ${quiz.duration} min</p>
+                <p>${quiz.questions} questions • ${quiz.duration}</p>
                 <span class="btn-start">Commencer <i class="fa-solid fa-arrow-right"></i></span>
             `;
 
