@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz 4 : Context Engineering - DevlopIA</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        /* Quiz Specific Styles */
+        .quiz-container {
+            max-width: 800px;
+            margin: 40px auto;
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .question-box {
+            margin-bottom: 30px;
+        }
+
+        .question-text {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: var(--text-dark);
+            margin-bottom: 20px;
+        }
+
+        .options-grid {
+            display: grid;
+            gap: 15px;
+        }
+
+        .option-btn {
+            padding: 15px 20px;
+            border: 2px solid #eee;
+            border-radius: 12px;
+            background: white;
+            text-align: left;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 1.1rem;
+        }
+
+        .option-btn:hover {
+            border-color: var(--primary-blue);
+            background: #f0f7ff;
+        }
+
+        .option-btn.correct {
+            background: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+        }
+
+        .option-btn.wrong {
+            background: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+
+        .feedback {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            background: #f8f9fa;
+            display: none;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+
+        .progress-bar {
+            height: 10px;
+            background: #eee;
+            border-radius: 5px;
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--primary-blue);
+            width: 0%;
+            transition: width 0.3s;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="container header-content">
+            <a href="index.html" class="logo">
+                <img src="assets/images/logo.svg" alt="DevlopIA Logo">
+            </a>
+            <a href="index.html" class="btn-start" style="padding: 5px 15px; font-size: 0.9rem;">Quitter</a>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="quiz-container">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress"></div>
+            </div>
+
+            <div id="quiz-content">
+                <!-- Question injected here -->
+            </div>
+
+            <div class="controls">
+                <button id="btn-next" class="btn-start" style="display:none;" onclick="nextQuestion()">Suivant <i
+                        class="fa-solid fa-arrow-right"></i></button>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const rawData = [{ "question": "Quelle est la relation entre le prompt engineering et le context engineering selon le document ?", "options": [{ "label": "A", "text": "Le context engineering est une petite partie du prompt engineering.", "isCorrect": false, "rationale": "Le document indique que c'est l'inverse : le prompt engineering est une composante du context engineering." }, { "label": "B", "text": "Le prompt engineering fait essentiellement partie du context engineering.", "isCorrect": true, "rationale": "Le context engineering est présenté comme l'art global de donner du contexte, englobant la rédaction de prompts précis." }, { "label": "C", "text": "Ce sont deux disciplines totalement indépendantes et opposées.", "isCorrect": false, "rationale": "Le texte précise que l'un s'inscrit dans l'autre pour maximiser les performances de l'IA." }, { "label": "D", "text": "Le prompt engineering remplace désormais le context engineering.", "isCorrect": false, "rationale": "Le context engineering est présenté comme une évolution ou un cadre plus large, et non comme un remplacement." }] }, { "question": "Dans l'analogie du burger, que représente le fait de mettre l'IA dans une cuisine avec tous les outils et la recette ?", "options": [{ "label": "A", "text": "Le Deep Learning", "isCorrect": false, "rationale": "Le Deep Learning concerne l'entraînement profond des modèles, pas l'aménagement de l'environnement de travail immédiat." }, { "label": "B", "text": "Le Prompt Engineering", "isCorrect": false, "rationale": "Le prompt engineering correspondrait plutôt à la commande précise des ingrédients, mais pas à l'environnement complet." }, { "label": "C", "text": "Le Context Engineering", "isCorrect": true, "rationale": "Le context engineering fournit à l'IA tout l'environnement et les instructions nécessaires pour qu'elle n'ait plus qu'à composer." }, { "label": "D", "text": "L'Hallucination", "isCorrect": false, "rationale": "L'hallucination est justement ce que l'on cherche à éviter en fournissant un contexte structuré." }] }, { "question": "Quel est l'avantage principal des 'Projets' sur la plateforme Claude ?", "options": [{ "label": "A", "text": "La génération exclusive d'images haute définition.", "isCorrect": false, "rationale": "Claude est principalement reconnu pour le texte, le code et l'analyse, et non spécifiquement comme un leader de la génération d'images." }, { "label": "B", "text": "L'utilisation par défaut du modèle de pensée RAG chirurgical.", "isCorrect": false, "rationale": "Le document attribue spécifiquement cette caractéristique technologique par défaut à Perplexity." }, { "label": "C", "text": "La capacité à digérer des dépôts GitHub et l'utilisation des MCP.", "isCorrect": true, "rationale": "Claude se distingue par son expertise en code et sa flexibilité de connexion à d'autres applications via le Model Context Protocol." }, { "label": "D", "text": "La transformation automatique des prompts en mini-applications ludiques.", "isCorrect": false, "rationale": "Cet aspect ludique et la forme de mini-applications sont des caractéristiques attribuées aux Gems de Gemini." }] }, { "question": "Que signifie l'acronyme RAG dans le cadre de l'utilisation de Perplexity ?", "options": [{ "label": "A", "text": "Rapid Autonomous Generation", "isCorrect": false, "rationale": "Bien que la rapidité soit un atout, cet acronyme ne correspond pas au terme technique utilisé dans le domaine des LLM." }, { "label": "B", "text": "Retrieval Augmented Generation", "isCorrect": true, "rationale": "Le RAG permet à l'IA d'aller chercher des informations spécifiques dans les sources fournies pour enrichir sa réponse." }, { "label": "C", "text": "Random Access Graphics", "isCorrect": false, "rationale": "Ce terme se rapproche de l'informatique matérielle et n'a aucun lien avec la génération de texte augmentée par des sources." }, { "label": "D", "text": "Recursive Analysis Grounding", "isCorrect": false, "rationale": "Ce terme est une invention plausible mais ne désigne pas le modèle de pensée ciblant précisément les sources documentaires." }] }, { "question": "Pourquoi la condensation de l'information est-elle considérée comme une règle d'or ?", "options": [{ "label": "A", "text": "Pour réduire les coûts d'abonnement aux plateformes d'IA.", "isCorrect": false, "rationale": "La condensation vise l'efficacité technique du modèle, pas directement la structure tarifaire des abonnements." }, { "label": "B", "text": "Parce que saturer la puissance de calcul de l'IA fait perdre en efficacité.", "isCorrect": true, "rationale": "Une surcharge d'informations inutiles peut dégrader la qualité du raisonnement de l'IA et gaspiller des ressources." }, { "label": "C", "text": "Pour empêcher l'IA d'apprendre des données confidentielles.", "isCorrect": false, "rationale": "La sécurité des données est un sujet différent de l'optimisation des performances par la concision." }, { "label": "D", "text": "Parce que les IA ne savent pas lire les documents de plus de dix pages.", "isCorrect": false, "rationale": "Les IA peuvent lire de longs documents, mais leur efficacité diminue si l'information n'est pas ciblée." }] }, { "question": "Dans l'exemple de création de vidéos TikTok, quel est l'objectif du Projet 2 (Reverse engineering) ?", "options": [{ "label": "A", "text": "Identifier les tendances actuelles et ce qui est viral.", "isCorrect": false, "rationale": "Il s'agit de la tâche du Projet 1, dédié à l'analyse concurrentielle." }, { "label": "B", "text": "Rédiger le script final avec toutes les données en entrée.", "isCorrect": false, "rationale": "La rédaction est l'étape finale confiée au Projet 3." }, { "label": "C", "text": "Décortiquer la structure, les hooks et les formats des vidéos virales.", "isCorrect": true, "rationale": "Le reverse engineering sert à comprendre la 'recette' du succès des vidéos analysées précédemment." }, { "label": "D", "text": "Publier automatiquement les vidéos sur le compte de l'utilisateur.", "isCorrect": false, "rationale": "Le document ne mentionne pas l'automatisation de la publication, mais la structuration du contenu créatif." }] }, { "question": "Quel risque court-on en fournissant trop d'outils différents à une IA dans un seul contexte ?", "options": [{ "label": "A", "text": "L'IA risque de devenir trop puissante et incontrôlable.", "isCorrect": false, "rationale": "Le problème est d'ordre opérationnel (efficacité) et non un scénario de science-fiction sur la puissance." }, { "label": "B", "text": "Elle risque de se 'noyer' et de perdre du temps à chercher l'outil adapté.", "isCorrect": true, "rationale": "Trop d'options créent de la confusion et empêchent l'utilisation efficace et ciblée de chaque outil." }, { "label": "C", "text": "Le coût de l'API va doubler instantanément.", "isCorrect": false, "rationale": "L'utilisation d'outils n'impacte pas le coût de la même manière qu'un volume de tokens massif ou un modèle spécifique." }, { "label": "D", "text": "Elle refusera systématiquement d'exécuter la tâche.", "isCorrect": false, "rationale": "L'IA tentera d'exécuter la tâche mais le fera de manière moins précise ou confuse." }] }, { "question": "Que signifie le phénomène de 'Poisoning' dans le context engineering ?", "options": [{ "label": "A", "text": "L'introduction de mauvaises informations ou d'hallucinations dans le contexte.", "isCorrect": true, "rationale": "Inclure des données erronées fragilise toute la structure du raisonnement futur de l'IA." }, { "label": "B", "text": "Une attaque informatique visant à supprimer le compte de l'utilisateur.", "isCorrect": false, "rationale": "Dans ce cours, le terme désigne la corruption des données de contexte, pas une cyberattaque externe." }, { "label": "C", "text": "Le fait que l'IA refuse de répondre par politesse excessive.", "isCorrect": false, "rationale": "Cela correspondrait plutôt à un sur-alignement des filtres de sécurité des créateurs." }, { "label": "D", "text": "L'utilisation de mots-clés interdits par les conditions d'utilisation.", "isCorrect": false, "rationale": "Ceci concerne la modération, tandis que le poisoning concerne la véracité et la solidité des informations fournies." }] }, { "question": "Selon le document, comment peut-on monétiser ses compétences en context engineering ?", "options": [{ "label": "A", "text": "En vendant des listes de prompts génériques sur internet.", "isCorrect": false, "rationale": "Le document suggère plutôt la création d'agents experts personnalisés pour des clients spécifiques." }, { "label": "B", "text": "En créant et vendant des agents experts, comme un rédacteur LinkedIn spécialisé.", "isCorrect": true, "rationale": "Former un agent sur le style d'un client et le connecter à ses outils est une compétence à haute valeur ajoutée." }, { "label": "C", "text": "En devenant modérateur pour les plateformes comme ChatGPT ou Claude.", "isCorrect": false, "rationale": "Cette activité n'est pas mentionnée comme une application du context engineering dans le texte." }, { "label": "D", "text": "En minant des cryptomonnaies grâce à la puissance des LLM.", "isCorrect": false, "rationale": "Le texte se concentre sur les services de productivité et de marketing, pas sur la blockchain." }] }, { "question": "Quelle est la solution recommandée pour éviter que l'IA ne 'divague' à cause d'un trop-plein de données ?", "options": [{ "label": "A", "text": "Augmenter la température du modèle au maximum.", "isCorrect": false, "rationale": "Augmenter la température augmente la créativité et le risque d'hallucination, ce qui aggraverait la divagation." }, { "label": "B", "text": "Supprimer toutes les instructions pour laisser l'IA libre.", "isCorrect": false, "rationale": "L'absence d'instructions est l'opposé du context engineering et ne résoudrait pas le problème." }, { "label": "C", "text": "Condenser les informations et externaliser certaines sources via des liens.", "isCorrect": true, "rationale": "Cela permet de rester sous la fenêtre de contexte maximale tout en gardant l'accès aux données nécessaires." }, { "label": "D", "text": "Changer systématiquement de modèle d'IA toutes les dix minutes.", "isCorrect": false, "rationale": "Le changement de modèle ne résout pas le problème de la structure des données fournies en entrée." }] }];
+
+        const quizData = rawData.map(q => {
+            const correctIndex = q.options.findIndex(o => o.isCorrect);
+            const explanation = correctIndex !== -1 ? q.options[correctIndex].rationale : "";
+            return {
+                question: q.question,
+                options: q.options.map(o => o.text),
+                correct: correctIndex,
+                explanation: explanation
+            };
+        });
+
+        let currentQuestion = 0;
+        let score = 0;
+
+        function loadQuestion() {
+            const data = quizData[currentQuestion];
+            document.getElementById('progress').style.width = ((currentQuestion + 1) / quizData.length * 100) + '%';
+
+            let html = `<div class="question-box fade-in">
+                <div class="question-text">${currentQuestion + 1}. ${data.question}</div>
+                <div class="options-grid">`;
+
+            data.options.forEach((opt, index) => {
+                html += `<button class="option-btn" onclick="checkAnswer(this, ${index})">${opt}</button>`;
+            });
+
+            html += `</div><div id="feedback-box" class="feedback"></div></div>`;
+            document.getElementById('quiz-content').innerHTML = html;
+            document.getElementById('btn-next').style.display = 'none';
+        }
+
+        function checkAnswer(btn, index) {
+            const data = quizData[currentQuestion];
+            const allBtns = document.querySelectorAll('.option-btn');
+            const feedback = document.getElementById('feedback-box');
+
+            // Disable all buttons
+            allBtns.forEach(b => b.disabled = true);
+
+            if (index === data.correct) {
+                btn.classList.add('correct');
+                feedback.innerHTML = '<i class="fa-solid fa-check-circle" style="color:var(--success)"></i> <strong>Bonne réponse !</strong> <br><div style="margin-top:10px">' + data.explanation + '</div>';
+                feedback.style.display = 'block';
+                feedback.style.borderLeft = '5px solid var(--success)';
+                score++;
+                confetti({ particleCount: 30, spread: 50, origin: { y: 0.7 }, colors: ['#5B9FFF', '#2ECC71'] });
+            } else {
+                btn.classList.add('wrong');
+                allBtns[data.correct].classList.add('correct'); // Show correct one
+                feedback.innerHTML = '<i class="fa-solid fa-times-circle" style="color:var(--error)"></i> <strong>Mauvaise réponse.</strong> <br><div style="margin-top:10px">' + data.explanation + '</div>';
+                feedback.style.display = 'block';
+                feedback.style.borderLeft = '5px solid var(--error)';
+            }
+
+            document.getElementById('btn-next').style.display = 'inline-block';
+        }
+
+        function nextQuestion() {
+            currentQuestion++;
+            if (currentQuestion < quizData.length) {
+                loadQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function showResults() {
+            const percentage = Math.round((score / quizData.length) * 100);
+            let message = "";
+            let emoji = "";
+
+            if (percentage >= 80) {
+                message = "Waouh ! Vous avez parfaitement saisi la nuance entre prompt et context engineering. 🚀";
+                emoji = "🏆";
+                // Big Celebration
+                var duration = 3 * 1000;
+                var animationEnd = Date.now() + duration;
+                var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
+                function random(min, max) { return Math.random() * (max - min) + min; }
+                var interval = setInterval(function () {
+                    var timeLeft = animationEnd - Date.now();
+                    if (timeLeft <= 0) { return clearInterval(interval); }
+                    var particleCount = 50 * (timeLeft / duration);
+                    confetti(Object.assign({}, defaults, { particleCount, origin: { x: random(0.1, 0.3), y: Math.random() - 0.2 } }));
+                    confetti(Object.assign({}, defaults, { particleCount, origin: { x: random(0.7, 0.9), y: Math.random() - 0.2 } }));
+                }, 250);
+
+            } else if (percentage >= 50) {
+                message = "Pas mal ! Encore quelques concepts à consolider, le context engineering n'aura bientôt plus de secrets pour vous. 😉";
+                emoji = "🥈";
+                confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+            } else if (percentage >= 30) {
+                message = "Il serait bon de revoir le cours. Le contexte compte plus que vous ne le pensez ! 📚";
+                emoji = "🥉";
+            } else {
+                message = "On dirait que votre 'contexte' était empoisonné. Un petit visionnage du cours s'impose ! 📉";
+                emoji = "📉";
+            }
+
+            document.getElementById('quiz-content').innerHTML = `
+                <div class="result-card fade-in">
+                    <div style="font-size: 5rem; margin-bottom: 20px;">${emoji}</div>
+                    <h2>Quiz Terminé !</h2>
+                    <div class="score-text">${score}/${quizData.length}</div>
+                    <p style="font-size: 1.2rem; color: #7f8c8d; margin-bottom: 30px;">Soit <strong>${percentage}%</strong> de réussite</p>
+                    <div class="fun-message">${message}</div>
+                    <br>
+                    <a href="index.html" class="btn-start" style="padding: 12px 30px; font-size: 1.1rem;">Retour au sommaire</a>
+                </div>
+            `;
+            document.getElementById('btn-next').style.display = 'none';
+            document.getElementById('progress').style.width = '100%';
+        }
+
+        // Init
+        loadQuestion();
+    </script>
+</body>
+
+</html>

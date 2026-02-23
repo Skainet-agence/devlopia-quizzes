@@ -26,5 +26,12 @@
         "questions": 10,
         "duration": "15 min",
         "file": "quiz-cours-3.html"
+    },
+    {
+        "id": 4,
+        "title": "Module 4: Context Engineering",
+        "questions": 10,
+        "duration": "15 min",
+        "file": "quiz-cours-4.html"
     }
 ]
