@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Automatisation 1 : Les Fondamentaux - DevlopIA</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        /* Quiz Specific Styles */
+        .quiz-container {
+            max-width: 800px;
+            margin: 40px auto;
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .question-box {
+            margin-bottom: 30px;
+        }
+
+        .question-text {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: var(--text-dark);
+            margin-bottom: 20px;
+        }
+
+        .options-grid {
+            display: grid;
+            gap: 15px;
+        }
+
+        .option-btn {
+            padding: 15px 20px;
+            border: 2px solid #eee;
+            border-radius: 12px;
+            background: white;
+            text-align: left;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 1.1rem;
+        }
+
+        .option-btn:hover {
+            border-color: var(--primary-blue);
+            background: #f0f7ff;
+        }
+
+        .option-btn.correct {
+            background: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+        }
+
+        .option-btn.wrong {
+            background: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+
+        .feedback {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            background: #f8f9fa;
+            display: none;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+
+        .progress-bar {
+            height: 10px;
+            background: #eee;
+            border-radius: 5px;
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--primary-blue);
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        .results-card {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .results-card .score-emoji {
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+
+        .results-card h2 {
+            font-size: 2rem;
+            color: var(--text-dark);
+            margin-bottom: 10px;
+        }
+
+        .results-card .score-details {
+            font-size: 1.2rem;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="container header-content">
+            <a class="logo" href="/">
+                <img src="assets/images/logo.svg" alt="DevlopIA Logo">
+            </a>
+            <a class="btn-start" href="/" style="padding: 5px 15px; font-size: 0.9rem;">Quitter</a>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="quiz-container">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress" style="width: 10%;"></div>
+            </div>
+
+            <div id="quiz-content">
+                <!-- Content injected by JS -->
+            </div>
+
+            <div class="controls">
+                <button id="btn-next" class="btn-start" style="display:none;" onclick="nextQuestion()">Suivant <i
+                        class="fa-solid fa-arrow-right"></i></button>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const rawData = [
+            {
+                "question": "Quelle est la faiblesse majeure d'une automatisation dite 'classique' par rapport à une automatisation intégrant l'IA ?",
+                "options": [
+                    { "label": "A", "text": "Elle est incapable de s'adapter au moindre changement imprévu dans les données d'entrée.", "isCorrect": true, "rationale": "Les systèmes classiques suivent un enchaînement rigide et prédéterminé qui échoue dès qu'un détail s'écarte de la règle établie." },
+                    { "label": "B", "text": "Elle coûte beaucoup plus cher en ressources de calcul qu'un LLM.", "isCorrect": false, "rationale": "Au contraire, les automatisations classiques sont généralement moins coûteuses car elles ne nécessitent pas de réflexion complexe." },
+                    { "label": "C", "text": "Elle nécessite obligatoirement une intervention humaine pour chaque étape du processus.", "isCorrect": false, "rationale": "Une automatisation, même classique, est par définition autonome une fois lancée, tant que l'environnement est stable." },
+                    { "label": "D", "text": "Elle ne peut pas être connectée à des outils externes comme Gmail ou des bases de données.", "isCorrect": false, "rationale": "L'automatisation classique peut se connecter à des API, mais elle ne comprend pas le sens des données qu'elle manipule." }
+                ]
+            },
+            {
+                "question": "Qu'est-ce qui distingue principalement un 'Agent IA' d'une simple 'Automatisation IA' ?",
+                "options": [
+                    { "label": "A", "text": "Sa capacité à prendre des décisions autonomes sur le choix des outils à utiliser selon la situation.", "isCorrect": true, "rationale": "L'agent analyse l'input et décide lui-même, via son prompt system, de la meilleure stratégie et de l'outil approprié." },
+                    { "label": "B", "text": "Le fait qu'il utilise un modèle de langage (LLM) pour traiter du texte.", "isCorrect": false, "rationale": "Les deux systèmes utilisent des LLM, mais l'automatisation IA classique est bridée à une tâche unique et prédéfinie." },
+                    { "label": "C", "text": "L'obligation d'avoir une interface de chat pour interagir avec l'utilisateur final.", "isCorrect": false, "rationale": "Un agent peut opérer de manière invisible dans un workflow sans nécessiter d'interface de discussion." },
+                    { "label": "D", "text": "Sa vitesse d'exécution qui est systématiquement supérieure à celle d'une automatisation classique.", "isCorrect": false, "rationale": "La réflexion d'un agent est souvent plus lente car elle nécessite plusieurs étapes d'analyse et de décision." }
+                ]
+            },
+            {
+                "question": "Pourquoi est-il déconseillé de confier une multitude de missions variées à un seul et unique agent IA ?",
+                "options": [
+                    { "label": "A", "text": "La complexité des instructions et des outils risque d'augmenter drastiquement le taux d'erreur et d'hallucinations.", "isCorrect": true, "rationale": "Plus un agent a de règles et d'outils différents, plus il risque de s'embrouiller ou de mal interpréter le contexte." },
+                    { "label": "B", "text": "Parce qu'un agent IA ne peut techniquement être connecté qu'à un seul outil à la fois.", "isCorrect": false, "rationale": "Un agent peut techniquement gérer plusieurs outils, mais c'est la fiabilité de son raisonnement qui diminue avec la complexité." },
+                    { "label": "C", "text": "Afin de réduire la consommation de bande passante sur le serveur VPS.", "isCorrect": false, "rationale": "Le problème n'est pas la bande passante, mais la qualité de l'output et le coût de la réflexion de l'IA." },
+                    { "label": "D", "text": "Car les LLM actuels sont limités à une seule réponse par période de 24 heures.", "isCorrect": false, "rationale": "Il n'existe pas de telle limite technique ; les agents peuvent être sollicités en continu." }
+                ]
+            },
+            {
+                "question": "Dans une architecture de 'sous-agents', quel est le rôle spécifique de l'agent orchestrateur ?",
+                "options": [
+                    { "label": "A", "text": "Analyser l'input initial pour identifier la tâche et la déléguer à l'expert approprié.", "isCorrect": true, "rationale": "L'orchestrateur sert de centre de tri intelligent qui formate les données et active le bon sous-agent spécialisé." },
+                    { "label": "B", "text": "S'occuper uniquement de la rédaction finale des contenus pour garantir un ton uniforme.", "isCorrect": false, "rationale": "La rédaction est généralement confiée à un sous-agent expert en contenu, pas à l'orchestrateur." },
+                    { "label": "C", "text": "Vérifier le solde bancaire de l'utilisateur avant de lancer chaque requête IA.", "isCorrect": false, "rationale": "Bien que le coût soit un facteur, l'orchestrateur gère la logique du workflow, pas les transactions financières." },
+                    { "label": "D", "text": "Remplacer les automatisations classiques pour réduire les coûts de fonctionnement.", "isCorrect": false, "rationale": "L'utilisation d'un orchestrateur et de sous-agents est au contraire plus coûteuse qu'une automatisation simple." }
+                ]
+            },
+            {
+                "question": "Selon le cours, quelle est la compétence clé qui différencie un expert en IA d'un simple 'bricoleur' ?",
+                "options": [
+                    { "label": "A", "text": "Savoir architecturer un système intelligemment pour maximiser la performance et limiter les erreurs.", "isCorrect": true, "rationale": "L'expert ne se contente pas d'utiliser l'IA, il conçoit l'environnement et la structure qui permettent à l'IA d'être fiable." },
+                    { "label": "B", "text": "Être capable de coder intégralement son propre modèle de langage (LLM) à la main.", "isCorrect": false, "rationale": "Le cours se concentre sur l'automatisation et l'utilisation de modèles existants via des outils comme n8n." },
+                    { "label": "C", "text": "Connaître par cœur tous les raccourcis clavier du logiciel Zapier.", "isCorrect": false, "rationale": "La maîtrise d'un outil spécifique est secondaire par rapport à la compréhension stratégique des systèmes." },
+                    { "label": "D", "text": "Utiliser systématiquement l'IA la plus chère pour toutes les tâches, même les plus simples.", "isCorrect": false, "rationale": "C'est l'inverse : l'expert sait quand utiliser une automatisation simple pour éviter de gaspiller de l'argent." }
+                ]
+            },
+            {
+                "question": "Quel risque financier majeur est associé à l'utilisation abusive des agents IA sans stratégie de décomposition ?",
+                "options": [
+                    { "label": "A", "text": "Un gaspillage important d'argent dû au coût élevé de la réflexion complexe des LLM.", "isCorrect": true, "rationale": "Plus la réflexion demandée à l'IA est longue et complexe, plus le coût des tokens (sollicitation de l'IA) augmente." },
+                    { "label": "B", "text": "Une amende automatique infligée par l'Open Source Initiative pour usage non éthique.", "isCorrect": false, "rationale": "Il n'existe aucune autorité de ce type qui inflige des amendes basées sur la structure de vos workflows." },
+                    { "label": "C", "text": "L'obligation de payer un abonnement triple chez tous les fournisseurs d'outils connectés.", "isCorrect": false, "rationale": "Le surcoût vient de la consommation de l'IA elle-même, pas nécessairement des abonnements aux outils tiers." },
+                    { "label": "D", "text": "Le rachat forcé de votre système par des entreprises comme Make ou Zapier.", "isCorrect": false, "rationale": "Ces entreprises sont des fournisseurs de services, elles n'ont aucun droit de propriété sur vos workflows." }
+                ]
+            },
+            {
+                "question": "Pourquoi n8n est-il considéré comme un meilleur investissement à long terme que Zapier ou Make ?",
+                "options": [
+                    { "label": "A", "text": "Son caractère open source garantit une absence de dépendance envers une entreprise privée et ses tarifs.", "isCorrect": true, "rationale": "Étant open source, vous possédez votre système et pouvez le faire tourner librement sans subir de hausses de prix arbitraires." },
+                    { "label": "B", "text": "Parce qu'il est le seul logiciel capable d'envoyer des emails via Google Gmail.", "isCorrect": false, "rationale": "Make et Zapier gèrent également très bien Gmail ; l'avantage de n8n réside dans la liberté et le coût." },
+                    { "label": "C", "text": "Parce qu'il est impossible de faire des erreurs de logique en utilisant n8n.", "isCorrect": false, "rationale": "n8n est plus complexe et demande justement une plus grande rigueur logique de la part de l'utilisateur." },
+                    { "label": "D", "text": "Car n8n offre gratuitement l'accès illimité à tous les modèles GPT-4.", "isCorrect": false, "rationale": "Vous devez toujours payer votre propre consommation d'IA (API Key) quel que soit l'outil utilisé." }
+                ]
+            },
+            {
+                "question": "Quel est l'inconvénient majeur de l'hébergement de n8n sur 'n8n Cloud' selon le cours ?",
+                "options": [
+                    { "label": "A", "text": "Le prix est élevé pour une limite stricte à seulement 3 workflows actifs.", "isCorrect": true, "rationale": "Le rapport coût/performance est jugé catastrophique car il bride l'évolutivité de vos automatisations." },
+                    { "label": "B", "text": "Il est impossible d'y connecter des agents IA.", "isCorrect": false, "rationale": "Le Cloud permet l'utilisation d'IA, mais de manière beaucoup plus coûteuse et limitée que sur un VPS." },
+                    { "label": "C", "text": "Les serveurs du Cloud n8n sont éteints durant la nuit.", "isCorrect": false, "rationale": "Le Cloud est actif 24h/24, contrairement à une installation locale sur un PC personnel." },
+                    { "label": "D", "text": "L'interface est uniquement disponible en langage binaire.", "isCorrect": false, "rationale": "L'interface est la même que sur les autres versions, elle inclut même une assistance IA pour construire les workflows." }
+                ]
+            },
+            {
+                "question": "Qu'implique une installation de n8n 'en local' sur son propre ordinateur ?",
+                "options": [
+                    { "label": "A", "text": "Les automatisations s'arrêtent dès que l'ordinateur est éteint ou mis en veille.", "isCorrect": true, "rationale": "L'instance dépend directement des ressources matérielles et de l'état de marche de votre machine personnelle." },
+                    { "label": "B", "text": "L'obligation de payer une licence annuelle de 500 euros à Microsoft.", "isCorrect": false, "rationale": "L'installation locale est 100% gratuite car vous utilisez votre propre puissance de calcul." },
+                    { "label": "C", "text": "Une vitesse d'exécution dix fois supérieure à n'importe quel serveur professionnel.", "isCorrect": false, "rationale": "La vitesse dépend de la puissance de votre PC, mais elle est souvent limitée par la connexion internet domestique." },
+                    { "label": "D", "text": "Une impossibilité totale d'utiliser des outils Google.", "isCorrect": false, "rationale": "On peut utiliser n'importe quel outil, mais la stabilité du système est précaire pour un usage pro." }
+                ]
+            },
+            {
+                "question": "Pourquoi l'utilisation d'un VPS (comme Hostinger) est-elle la méthode recommandée pour les professionnels ?",
+                "options": [
+                    { "label": "A", "text": "Il offre un contrôle total, une sécurité maximale et une disponibilité du système 24h/24.", "isCorrect": true, "rationale": "Un VPS est un serveur distant qui ne s'arrête jamais, permettant de gérer des workflows pro et de respecter la RGPD." },
+                    { "label": "B", "text": "Parce qu'Hostinger offre gratuitement tous les abonnements aux logiciels tiers.", "isCorrect": false, "rationale": "Hostinger n'héberge que votre instance n8n ; les abonnements aux autres outils restent à votre charge." },
+                    { "label": "C", "text": "Car c'est la seule méthode qui ne nécessite absolument aucune connaissance technique.", "isCorrect": false, "rationale": "Bien qu'Hostinger facilite l'installation, cela reste plus technique que d'utiliser une solution clé en main comme Zapier." },
+                    { "label": "D", "text": "Parce que le gouvernement français impose l'usage d'un VPS pour toute utilisation de l'IA.", "isCorrect": false, "rationale": "Il n'y a pas d'obligation légale, c'est un choix stratégique pour la fiabilité et la conformité aux données." }
+                ]
+            }
+        ];
+
+        const quizData = rawData.map(q => {
+            const correctIndex = q.options.findIndex(o => o.isCorrect);
+            const explanation = correctIndex !== -1 ? q.options[correctIndex].rationale : "";
+            return {
+                question: q.question,
+                options: q.options.map(o => o.text),
+                correct: correctIndex,
+                explanation: explanation
+            };
+        });
+
+        let currentQuestion = 0;
+        let score = 0;
+
+        function loadQuestion() {
+            const data = quizData[currentQuestion];
+            document.getElementById('progress').style.width = ((currentQuestion + 1) / quizData.length * 100) + '%';
+
+            let html = `<div class="question-box fade-in">
+                <div class="question-text">${currentQuestion + 1}. ${data.question}</div>
+                <div class="options-grid">`;
+
+            data.options.forEach((opt, index) => {
+                html += `<button class="option-btn" onclick="checkAnswer(this, ${index})">${opt}</button>`;
+            });
+
+            html += `</div><div id="feedback-box" class="feedback"></div></div>`;
+            document.getElementById('quiz-content').innerHTML = html;
+            document.getElementById('btn-next').style.display = 'none';
+        }
+
+        function checkAnswer(btn, index) {
+            const data = quizData[currentQuestion];
+            const allBtns = document.querySelectorAll('.option-btn');
+            const feedback = document.getElementById('feedback-box');
+
+            allBtns.forEach(b => b.disabled = true);
+
+            if (index === data.correct) {
+                btn.classList.add('correct');
+                feedback.innerHTML = '<strong>Bonne réponse !</strong> <br>' + data.explanation;
+                feedback.style.display = 'block';
+                score++;
+                if (typeof confetti === 'function') {
+                    confetti({ particleCount: 60, spread: 55, origin: { y: 0.6 } });
+                }
+            } else {
+                btn.classList.add('wrong');
+                allBtns[data.correct].classList.add('correct');
+                feedback.innerHTML = '<strong>Mauvaise réponse.</strong> <br>' + data.explanation;
+                feedback.style.display = 'block';
+            }
+            document.getElementById('btn-next').style.display = 'inline-block';
+
+            if (currentQuestion === quizData.length - 1) {
+                document.getElementById('btn-next').textContent = 'Voir mes résultats';
+                document.getElementById('btn-next').innerHTML = 'Voir mes résultats <i class="fa-solid fa-flag-checkered"></i>';
+            }
+        }
+
+        function nextQuestion() {
+            currentQuestion++;
+            if (currentQuestion < quizData.length) {
+                loadQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function showResults() {
+            const percentage = Math.round((score / quizData.length) * 100);
+            let emoji = '😔';
+            let message = 'Continue tes efforts !';
+            if (percentage >= 90) { emoji = '🏆'; message = 'Excellent ! Tu maîtrises le sujet !'; }
+            else if (percentage >= 70) { emoji = '🎉'; message = 'Très bien ! Continue comme ça !'; }
+            else if (percentage >= 50) { emoji = '👍'; message = 'Pas mal ! Tu peux encore progresser.'; }
+
+            if (percentage >= 70 && typeof confetti === 'function') {
+                confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
+            }
+
+            document.getElementById('quiz-content').innerHTML = `
+                <div class="results-card fade-in">
+                    <div class="score-emoji">${emoji}</div>
+                    <h2>${message}</h2>
+                    <div class="score-details">${score} / ${quizData.length} bonnes réponses (${percentage}%)</div>
+                    <a href="/" class="btn-start">Retour au sommaire <i class="fa-solid fa-house"></i></a>
+                </div>`;
+            document.getElementById('btn-next').style.display = 'none';
+            document.querySelector('.progress-fill').style.width = '100%';
+        }
+
+        loadQuestion();
+    </script>
+</body>
+
+</html>

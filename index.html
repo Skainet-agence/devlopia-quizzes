@@ -8,13 +8,22 @@
     <link rel="stylesheet" href="assets/css/style.css">
     <!-- Integration de FontAwesome pour les icones -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body::-webkit-scrollbar {
+            display: none;
+        }
+
+        html::-webkit-scrollbar {
+            display: none;
+        }
+    </style>
 </head>
 
 <body>
 
     <header>
         <div class="container header-content">
-            <a href="index.html" class="logo">
+            <a class="logo" href="/">
                 <img src="assets/images/logo.svg" alt="DevlopIA Logo">
             </a>
             <!-- Placeholder pour menu futur -->
@@ -35,15 +44,21 @@
             <h2 class="category-title"><i class="fa-solid fa-layer-group"></i> Base de l'IA</h2>
 
             <div id="base-ia-grid" class="quiz-grid">
-                <!-- Les cartes de quiz seront injectées ici par JS -->
-                <p style="text-align: center; color: var(--text-gray); width: 100%;">Chargement des quiz...</p>
+                <!-- Les cartes de quiz sont injectées ici par app.js -->
+            </div>
+
+            <!-- Catégorie Automatisation -->
+            <h2 class="category-title" style="margin-top: 50px;"><i class="fa-solid fa-robot"></i> Automatisation</h2>
+
+            <div id="automatisation-grid" class="quiz-grid">
+                <!-- Les cartes de quiz sont injectées ici par app.js -->
             </div>
         </section>
     </main>
 
     <footer>
         <div class="container">
-            <p>&copy; 2026 DevlopIA School - Tous droits réservés.</p>
+            <p>© 2026 DevlopIA School - Tous droits réservés.</p>
         </div>
     </footer>
 

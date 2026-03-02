@@ -4,34 +4,47 @@
         "title": "Quiz Démo: Les Bases de l'IA",
         "questions": 4,
         "duration": "2 min",
-        "file": "quiz-demo.html"
+        "file": "quiz-demo.html",
+        "category": "base-ia"
     },
     {
         "id": 1,
         "title": "Module 1: Introduction LLMs",
         "questions": 10,
         "duration": "10 min",
-        "file": "quiz-cours-1.html"
+        "file": "quiz-cours-1.html",
+        "category": "base-ia"
     },
     {
         "id": 2,
         "title": "Module 2: Contexte & Mémoire",
         "questions": 10,
         "duration": "15 min",
-        "file": "quiz-cours-2.html"
+        "file": "quiz-cours-2.html",
+        "category": "base-ia"
     },
     {
         "id": 3,
         "title": "Module 3: Prompt Engineering Pratique",
         "questions": 10,
         "duration": "15 min",
-        "file": "quiz-cours-3.html"
+        "file": "quiz-cours-3.html",
+        "category": "base-ia"
     },
     {
         "id": 4,
         "title": "Module 4: Context Engineering",
         "questions": 10,
         "duration": "15 min",
-        "file": "quiz-cours-4.html"
+        "file": "quiz-cours-4.html",
+        "category": "base-ia"
+    },
+    {
+        "id": "auto-1",
+        "title": "Automatisation 1 : Les Fondamentaux",
+        "questions": 10,
+        "duration": "15 min",
+        "file": "quiz-automatisation-1.html",
+        "category": "automatisation"
     }
 ]
